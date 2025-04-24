@@ -32,3 +32,5 @@ jobs:
             /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart ws-server
             /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart fe-server
           EOF
+
+          
