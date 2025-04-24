@@ -1,4 +1,5 @@
 name: Deploy to staging
+
 on:
   push:
     branches:
@@ -7,25 +8,27 @@ on:
 jobs:
   redeploy_everything:
     name: Deploying everything to the staging cluster
-    runs-on: ubuntu-latest  # ✅ required to specify the runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v3  # ✅ required to get code into the runner
+        uses: actions/checkout@v3
 
       - name: Setup SSH key
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
-          chmod 600 ~/ssh_key  # ✅ secure the key
+          chmod 600 ~/ssh_key
 
       - name: SSH and deploy
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/ssh_key ubuntu@13.201.19.72 << 'EOF'
+            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v22.14.0/bin
+
             cd devops-25/
             git pull
-            pnpm install  # ✅ fixed typo
-            pnpm run build
-            pm2 restart http-server
-            pm2 restart ws-server
-            pm2 restart fe-server
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pnpm install
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pnpm run build
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart http-server
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart ws-server
+            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart fe-server
           EOF
