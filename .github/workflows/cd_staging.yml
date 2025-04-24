@@ -26,11 +26,21 @@ jobs:
 
             cd devops-25/
             git pull
-            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pnpm install
-            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pnpm run build
-            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart http-server
-            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart ws-server
-            /home/ubuntu/.nvm/versions/node/v22.14.0/bin/pm2 restart fe-server
-          EOF
 
-          
+            pnpm install
+            pnpm run build
+
+            # Smart start or restart using PM2
+            for app in http-server ws-server fe-server
+            do
+              if pm2 describe $app > /dev/null; then
+                echo "Restarting $app..."
+                pm2 restart $app
+              else
+                echo "Starting $app..."
+                pm2 start apps/$app/dist/index.js --name $app
+              fi
+            done
+
+            pm2 save
+          EOF
