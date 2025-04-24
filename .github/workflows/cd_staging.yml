@@ -6,16 +6,24 @@ on:
 
 jobs:
   redeploy_everything:
-    name: Deploy to staging cluster
-    runs-on: ubuntu-latest
+    name: Deploying everything to the staging cluster
+    runs-on: ubuntu-latest  # ✅ required to specify the runner
+
     steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3  # ✅ required to get code into the runner
+
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          chmod 600 ~/ssh_key  # ✅ secure the key
+
       - name: SSH and deploy
         run: |
-          echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/ssh_key
-          chmod 600 ~/ssh_key
-          ssh -i ~/ssh_key -o StrictHostKeyChecking=no ubuntu@13.201.19.72 << 'EOF'
-            cd devops-25/ && git pull
-            pnpm install
+          ssh -o StrictHostKeyChecking=no -i ~/ssh_key ubuntu@13.201.19.72 << 'EOF'
+            cd devops-25/
+            git pull
+            pnpm install  # ✅ fixed typo
             pnpm run build
             pm2 restart http-server
             pm2 restart ws-server
